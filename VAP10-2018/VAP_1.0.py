@@ -16,12 +16,12 @@ def kausta_kontroll(*args):
         kontroll=kaustanimi+'\\'+'1SBOPER.DBF'
         if os.path.isfile(kontroll):
             andmebaas = 'C:\\1SBW6\\'+user_dir.get()+'\\1SBOPER.DBF'
-            progress_text.set('Идет обработка базы данных...   ')
+            progress_text.set('Andmebaas vaadatakse läbi...   ')
             calculate(andmebaas)
         else:
-            progress_text.set('Ошибка. Там нет базы данных.')
+            progress_text.set('Viga. Anmeid ei leia.')
     else:
-        progress_text.set('Ошибка. Нет такой директории.')
+        progress_text.set('Viga. Sellist kausta ei leia.')
  
  
 # abifunktsioon; kontrollib andmeid TSD palgalehtedes
@@ -485,7 +485,7 @@ def calculate(path):
     n = open(kaust+"\\data_nimekiri.txt", "w", encoding="UTF-8")
     # avame faili töötajate andmete salvestamiseks    
     if len(indeksid)==0:
-        error_text_2.set('Пустая база данных 1С. Работников не найдено.')
+        error_text_2.set('Tühi andmebaas 1С. Ei ole töötajaid.')
         korras = False
     # lisaks kontrollime võimalikud vead töötajate andmebaasis; kui esineb vigu, siis 'korras' muutuja asendatakse 'False' asendisse
     else:
@@ -498,7 +498,7 @@ def calculate(path):
                     str_nimed += ', '
                 if i == 3 or i == 7 or i == 11 or i == 15:
                     str_nimed += '\n'    
-            error_text_3.set('--> Проверьте больничные листы и количество больничных дней:\n' + str_nimed)
+            error_text_3.set('--> Kontrollige haiguslehed ja haiguslehtede päevade arv:\n' + str_nimed)
             # haiguslehete nimede kontroll
             #    haigusleht_nimekiri.remove(indekseerimine[key])
             #for i in range(len(haigusleht_nimekiri)):
@@ -525,7 +525,7 @@ def calculate(path):
             else:
                 lause = lause + 'None/'
                 korras = False
-                lisa1 = '--> Проверьте имена и фамилии работников.\n'
+                lisa1 = '--> Kontrollige töötajate nimed ja perekonnanimed.\n'
             if indeksid[i] in toolepingu_algused:
                 # töölepingu alguse kuupäev
                 lause = lause + toolepingu_algused[indeksid[i]]+'/'
@@ -533,7 +533,7 @@ def calculate(path):
             else:
                 lause = lause + 'None/'
                 korras = False
-                lisa2 = '--> Проверьте даты начала трудовых договоров.\n'
+                lisa2 = '--> Kontrollige töölepingute alguskuupäevad.\n'
             if indeksid[i] in toolepingu_lopud:
                 # töölepingu lõpu kuupäev
                 lause = lause + toolepingu_lopud[indeksid[i]]+'/'
@@ -556,20 +556,20 @@ def calculate(path):
                 lause = lause + '0'
             n.write(lause + "\n")
         if korras == False:    
-            error_text_1.set('Неполная информация по работникам в базе данных.\n'+lisa1+lisa2)    
+            error_text_1.set('Töötajate andmed puuduvad. Palun kontrollige andmeid.\n'+lisa1+lisa2)    
     n.close()
 
    
     # andmebaasi läbivaatamise lõpp
     andmete_kontroll()
-    progress_text.set('База данных обработана.')
+    progress_text.set('Andmebaas on vaadatud läbi.')
 
     print_kirjavead = False
     if len(indeksid)>0:
         kirjavead = nimede_kontroll(tsd_nimekiri)
     else:
         kirjavead = []
-        error_text_1.set('Пустая база данных. Проверьте название директории.')
+        error_text_1.set('Tühi andmebaas 1С. Töötajaid pole.')
     # kontrollimiseks on töötasu saanud inimeste nimekiri
     
     if len(kirjavead)>0:
@@ -578,13 +578,13 @@ def calculate(path):
         # jariendist, kus on eksklikud nimed asuvad ennikutes paaridena, teeme suure sõnumi
         for i in range(len(kirjavead)):
             nimede_paarid = nimede_paarid +'--> '+ str(kirjavead[i]) +'\n'
-        error_text_2.set('NB! Подозрение на повторение в ТОО фамилий с опечатками:\n' + nimede_paarid)
+        error_text_2.set('NB! Kahtlus, et esineb kirjaveadega perekonnanimesid:\n' + nimede_paarid)
     
     if korras == False:  
-        info_text.set('К сожалению, расчет резерва отпусков невозможен.\n\nОбнаружены следующие ошибки:')
+        info_text.set('Kahjuks ei saa hakata puhkusereservi arvutama.\n\nLeitud vead:')
     elif korras == True:
-        info_text.set('Поздравляем!')
-        error_text_1.set('Ошибок в базе данных не обнаружено.\nМожно попробовать рассчитать резерв отпусков.')    
+        info_text.set('Palju õnne!')
+        error_text_1.set('Andmebaasi vigu ei leitud.\nVõib puhkuse reservi arvutada.')    
     
     show_dataframe2(korras,print_kirjavead,hg)
     # nüüd ilmutame datafame2 ekraanile
@@ -592,7 +592,7 @@ def calculate(path):
 
 def show_dataframe2(korras,print_kirjavead,hg):
     # dataframe2 ilmutame ekraanile
-    dataframe2 = ttk.Labelframe(mainframe, text=' 2. Расчет резерва отпусков ', padding='5 5 5 5')
+    dataframe2 = ttk.Labelframe(mainframe, text=' 2. Puhkusereservi välja arvutamine ', padding='5 5 5 5')
     dataframe2.grid(column=0, row=1, columnspan=2, sticky=(W, N, E, S))     
     # dataframe2 - tekstid 5,6,7,8 ja muu stuff    
     text_5=ttk.Label(dataframe2, textvariable=info_text)
@@ -605,7 +605,7 @@ def show_dataframe2(korras,print_kirjavead,hg):
     if korras:
         printpic = ttk.Label(dataframe2, image=printimg)
         printpic.grid(column=0, row=1, rowspan=2, sticky=(W, E, S))
-        nupp2 = ttk.Button(dataframe2, text="Рассчитать отпуска", command=puhkuse_reserv)
+        nupp2 = ttk.Button(dataframe2, text="Arvutada puhkusereserv", command=puhkuse_reserv)
         nupp2.grid(column=1, row=2, sticky=W)
         ttk.Label(dataframe2, text=' ').grid(column=0, row=4)
     if hg:
@@ -649,7 +649,7 @@ arrowimg = PhotoImage(file='arrow2.png')
 mainframe = ttk.Frame(root, padding='20 20 20 20', relief='ridge',height=800)
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-dataframe1 = ttk.Labelframe(mainframe, text=' 1. Обработка базы данных ', padding=my_padding)
+dataframe1 = ttk.Labelframe(mainframe, text=' 1. Andmebaasi aken ', padding=my_padding)
 dataframe1.grid(column=0, row=0, sticky=(N, W, E))
 
 logoframe = ttk.Frame(mainframe, padding=my_padding)
@@ -657,7 +657,7 @@ logoframe.grid(column=1, row=0, sticky=(N, W, E, S))
 ttk.Label(logoframe, image=logoimg).grid(column=0, row=0, sticky=(N, W, E, S))
 
 # dataframe1 - tekstid 1,2,3,4 ja muu stuff
-text_1 = ttk.Label(dataframe1, text="Введите название директории, где находится база данных 1C: ")
+text_1 = ttk.Label(dataframe1, text="Sisestage kasta nimetus, kus asub 1C andmebaas: ")
 text_1.grid(column=0, row=1, sticky=W, columnspan=3)
 
 s1 = ttk.Separator(dataframe1, orient=HORIZONTAL)
@@ -666,14 +666,15 @@ s1.grid(column=0, row=2, sticky=(W, E), columnspan=3)
 text_2 = ttk.Label(dataframe1, text="C:\\1SBW6\\ ")
 text_2.grid(column=0, row=3, sticky=W)
 
-check = ttk.Checkbutton(dataframe1, text='Имя/Фамилия', variable=checked)
+check = ttk.Checkbutton(dataframe1, text='Nimi/Perekonnanimi', variable=checked)
+checked.set(True)
 check.grid(column=0, row=6, sticky=(N,W))
 
 dir_entry = ttk.Entry(dataframe1, textvariable=user_dir)
 dir_entry.grid(column=1, row=3, sticky=W)
 dir_entry.focus()
 
-ttk.Label(dataframe1, text="За отчетный год: ").grid(column=0, row=0, sticky=W)
+ttk.Label(dataframe1, text="Majandusaasta: ").grid(column=0, row=0, sticky=W)
 year_entry = ttk.Entry(dataframe1, width=4, textvariable=user_year)
 year_entry.grid(column=1, row=0, sticky=W)
 
